@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require("express");
 const { Pool } = require("pg");
 
@@ -12,9 +13,6 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // Neon commonly requires SSL. If your DATABASE_URL already has sslmode=require,
-  // this usually works without extra config. If you still get SSL errors, uncomment below.
-  // ssl: { rejectUnauthorized: true },
 });
 
 app.get("/health", async (req, res) => {
