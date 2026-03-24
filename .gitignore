@@ -5,3 +5,4 @@ src/package-lock.json
 src/package.json
 junk/
 .agents/
+slight.pem

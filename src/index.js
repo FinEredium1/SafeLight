@@ -1,7 +1,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
 const express = require("express");
-const { Pool } = require("pg");
+const pool = require("./db");
 
 const app = express();
 app.use(express.json());
@@ -10,10 +11,6 @@ if (!process.env.DATABASE_URL) {
   console.error("Missing DATABASE_URL in environment");
   process.exit(1);
 }
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
 
 app.get("/health", async (req, res) => {
   try {
