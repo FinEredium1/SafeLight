@@ -4,6 +4,9 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const app = express();
 
+const cors = require('cors');
+app.use(cors());
+
 app.use(express.json());
 
 require('./db'); // connects on startup

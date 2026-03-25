@@ -4,3 +4,6 @@ src/.env
 junk/
 .agents/
 slight.pem
+client/.firebase
+client/.firebaserc
+client/firebase.json
