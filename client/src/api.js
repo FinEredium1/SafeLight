@@ -1,7 +1,8 @@
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 const getToken = () => localStorage.getItem('token');
 
 export async function register(username, email, password, public_key) {
-  const res = await fetch('/auth/register', {
+  const res = await fetch(`${API_BASE}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, email, password, public_key })
@@ -12,7 +13,7 @@ export async function register(username, email, password, public_key) {
 }
 
 export async function login(email, password) {
-  const res = await fetch('/auth/login', {
+  const res = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -23,7 +24,7 @@ export async function login(email, password) {
 }
 
 export async function getMe() {
-  const res = await fetch('/me', {
+  const res = await fetch(`${API_BASE}/me`, {
     headers: { Authorization: `Bearer ${getToken()}` }
   });
   const data = await res.json();
@@ -32,7 +33,7 @@ export async function getMe() {
 }
 
 export async function getConversations() {
-  const res = await fetch('/conversations', {
+  const res = await fetch(`${API_BASE}/conversations`, {
     headers: { Authorization: `Bearer ${getToken()}` }
   });
   const data = await res.json();
@@ -41,7 +42,7 @@ export async function getConversations() {
 }
 
 export async function startConversation(username) {
-  const res = await fetch(`/conversations/with/${username}`, {
+  const res = await fetch(`${API_BASE}/conversations/with/${username}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${getToken()}` }
   });
@@ -53,8 +54,8 @@ export async function startConversation(username) {
 
 export async function getMessages(conversationId, cursor = null) {
   const url = cursor
-    ? `/conversations/${conversationId}/messages?cursor=${encodeURIComponent(cursor)}`
-    : `/conversations/${conversationId}/messages`;
+    ? `${API_BASE}/conversations/${conversationId}/messages?cursor=${encodeURIComponent(cursor)}`
+    : `${API_BASE}/conversations/${conversationId}/messages`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${getToken()}` }
@@ -66,7 +67,7 @@ export async function getMessages(conversationId, cursor = null) {
 }
 
 export async function sendMessage(conversationId, encrypted_content) {
-  const res = await fetch(`/conversations/${conversationId}/messages`, {
+  const res = await fetch(`${API_BASE}/conversations/${conversationId}/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ export async function sendMessage(conversationId, encrypted_content) {
 }
 
 export async function markConversationRead(conversationId, last_read_message_id) {
-  const res = await fetch(`/conversations/${conversationId}/read`, {
+  const res = await fetch(`${API_BASE}/conversations/${conversationId}/read`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
