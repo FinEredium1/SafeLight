@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = 'https://safelight.onrender.com';
 const getToken = () => localStorage.getItem('token');
 
 export async function register(username, email, password, public_key) {
