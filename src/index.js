@@ -10,9 +10,14 @@ require('./db'); // connects on startup
 
 const authRoutes = require('./routes/authen');
 const meRoutes  = require('./routes/me');
+const usersRoutes = require('./routes/users');
+const conversationsRoutes = require('./routes/conversations');
+
 
 app.use('/auth', authRoutes);
 app.use('/me',   meRoutes);
+app.use('/users', usersRoutes);
+app.use('/conversations', conversationsRoutes);
 
 app.get('/health', async (req, res) => {
   try {
