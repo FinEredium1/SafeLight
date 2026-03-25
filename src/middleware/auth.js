@@ -16,6 +16,6 @@ function auth_middleware(req, res, next){
     } catch (err){
         return res.status(401).json({error : "Invalid or expired token"})
     }
-
-    module.exports = auth_middleware;
 }
+
+module.exports = auth_middleware;
