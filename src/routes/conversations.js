@@ -105,6 +105,38 @@ router.post('/with/:username', authMiddleware, async (req, res) => {
 });
 
 
+// recipient (the other member's) current public key — needed to encrypt
+router.get('/:conversationId/recipient-key', authMiddleware, async (req, res) => {
+  const { conversationId } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT u.id AS user_id, u.username, upk.key_id, upk.public_key
+         FROM conversation_members cm
+         JOIN users u            ON u.id = cm.user_id
+         JOIN user_public_keys upk
+           ON upk.user_id = u.id
+          AND upk.key_id  = u.current_key_id
+          AND upk.is_active = true
+          AND upk.revoked_at IS NULL
+        WHERE cm.conversation_id = $1
+          AND cm.user_id <> $2`,
+      [conversationId, req.user.id]
+    );
+
+    if (!result.rows[0]) {
+      // 404 also covers "I'm not a member" (no row matches the other side).
+      return res.status(404).json({ error: 'Recipient or active key not found' });
+    }
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error('[recipient-key]', err.message);
+    return res.status(500).json({ error: 'Failed to fetch recipient key' });
+  }
+});
+
+
 // send message
 router.post('/:conversationId/messages', authMiddleware, async (req, res) => {
   const { conversationId } = req.params;

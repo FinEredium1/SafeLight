@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../api';
+import { login, getMe, getKeyVault } from '../api';
+import { unwrapPrivateKey, setSession } from '../keyvault';
 import '../styles/safelight.css';
 
 export default function Login() {
@@ -21,6 +22,16 @@ export default function Login() {
     try {
       const data = await login(form.email, form.password);
       localStorage.setItem('token', data.token);
+
+      // Restore identity keys: fetch the encrypted vault and unlock it locally.
+      const bundle = await getKeyVault();
+      if (!bundle) {
+        throw new Error('No key vault found for this account');
+      }
+      const { privateKey, publicKey } = await unwrapPrivateKey(bundle, form.password);
+      const me = await getMe();
+      setSession({ privateKey, publicKey, userId: me.id });
+
       navigate('/');
     } catch (err) {
       setError(err.message || 'Login failed');

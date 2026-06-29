@@ -66,18 +66,55 @@ export async function getMessages(conversationId, cursor = null) {
   return data;
 }
 
-export async function sendMessage(conversationId, encrypted_content) {
+export async function sendMessage(conversationId, payload) {
+  // `payload` is { encrypted_content, recipient_key_id?, sender_ephemeral_pubkey?, crypto_suite? }.
+  // A bare string is still accepted for backward compatibility.
+  const body = typeof payload === 'string' ? { encrypted_content: payload } : payload;
+
   const res = await fetch(`${API_BASE}/conversations/${conversationId}/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken()}`
     },
-    body: JSON.stringify({ encrypted_content })
+    body: JSON.stringify(body)
   });
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to send message');
+  return data;
+}
+
+export async function getRecipientKey(conversationId) {
+  const res = await fetch(`${API_BASE}/conversations/${conversationId}/recipient-key`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch recipient key');
+  return data;
+}
+
+export async function getKeyVault() {
+  const res = await fetch(`${API_BASE}/me/keyvault`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  });
+  if (res.status === 404) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch key vault');
+  return data.bundle;
+}
+
+export async function putKeyVault(bundle) {
+  const res = await fetch(`${API_BASE}/me/keyvault`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ bundle })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to store key vault');
   return data;
 }
 

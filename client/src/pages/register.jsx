@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { register } from '../api';
+import { register, getMe, putKeyVault } from '../api';
+import { generateIdentityKeyPair } from '../crypto';
+import { wrapPrivateKey, setSession } from '../keyvault';
 import '../styles/safelight.css';
 
 export default function Register() {
@@ -19,13 +21,21 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const data = await register(
-        form.username,
-        form.email,
-        form.password,
-        'placeholder_public_key'
-      );
+      // 1) Generate the long-term identity keypair in the browser.
+      const { publicKey, privateKey } = await generateIdentityKeyPair();
+
+      // 2) Register, publishing only the PUBLIC key.
+      const data = await register(form.username, form.email, form.password, publicKey);
       localStorage.setItem('token', data.token);
+
+      // 3) Encrypt the PRIVATE key with the password and back it up to the server.
+      const bundle = await wrapPrivateKey(privateKey, publicKey, form.password);
+      await putKeyVault(bundle);
+
+      // 4) Unlock this session in memory.
+      const me = await getMe();
+      setSession({ privateKey, publicKey, userId: me.id });
+
       navigate('/');
     } catch (err) {
       setError(err.message || 'Registration failed');
